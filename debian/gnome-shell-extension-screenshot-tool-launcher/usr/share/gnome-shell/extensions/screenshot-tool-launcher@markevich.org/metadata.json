@@ -1,7 +1,0 @@
-{
-    "name": "Screenshot Tool Launcher",
-    "description": "Adds a configurable action button to screenshot notifications to pass the captured file to an external command.",
-    "uuid": "screenshot-tool-launcher@markevich.org",
-    "shell-version": ["47", "48", "49", "50"],
-    "settings-schema": "org.gnome.shell.extensions.screenshot-tool-launcher"
-}

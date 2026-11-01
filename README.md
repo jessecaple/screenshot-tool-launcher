@@ -1,132 +1,40 @@
 # Screenshot Tool Launcher
 
-GNOME Shell extension that adds a configurable action button to screenshot and screen recording notifications, allowing you to pass the captured file to an external command.
-
-Supports GNOME Shell 47+.
+A personal adaptation of [Michael Markevich’s extension](https://github.com/michael-markevich/screenshot-tool-launcher).
+Adds **Annotate** to GNOME screenshot notifications and opens the image in the
+Gradia Flatpak (`be.alexandervanhee.gradia`). There are no preferences.
+The original MIT license is retained in [LICENSE](LICENSE).
 
 ## Install
 
-### Per-user
+Install Gradia, then copy the extension:
 
-```bash
-EXT_DIR="$HOME/.local/share/gnome-shell/extensions/screenshot-tool-launcher@markevich.org"
-mkdir -p "$EXT_DIR"
-cp -r screenshot-tool-launcher@markevich.org/* "$EXT_DIR/"
+```sh
+flatpak install flathub be.alexandervanhee.gradia
+extension_dir="$HOME/.local/share/gnome-shell/extensions/screenshot-tool-launcher@markevich.org"
+mkdir -p "$extension_dir"
+cp screenshot-tool-launcher@markevich.org/{extension.js,metadata.json} "$extension_dir/"
 ```
 
-### System-wide
+When replacing the original extension, remove its old `prefs.js` and `schemas/`
+from that installation directory. Its saved settings are unused.
+Sign out and back in, then enable it:
 
-```bash
-sudo cp -r screenshot-tool-launcher@markevich.org /usr/share/gnome-shell/extensions/
-sudo glib-compile-schemas /usr/share/gnome-shell/extensions/screenshot-tool-launcher@markevich.org/schemas/
-sudo cp screenshot-tool-launcher@markevich.org/schemas/org.gnome.shell.extensions.screenshot-tool-launcher.gschema.xml \
-  /usr/share/glib-2.0/schemas/
-sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
-```
-
-Restart GNOME Shell to discover the extension:
-- **X11:** Alt+F2, type `r`, Enter
-- **Wayland:** Log out and log back in
-
-Then enable:
-
-```bash
+```sh
 gnome-extensions enable screenshot-tool-launcher@markevich.org
 ```
 
-## Configure
+The metadata declares GNOME Shell 47–51 compatibility. The notification and
+launch checks have been run on GNOME 50; GNOME 51 still needs a runtime check.
 
-### GUI
+## Check changes
 
-Open the preferences window from the Extensions app (gear icon) or the command line:
+With `gnome-shell-test-tool` installed:
 
-```bash
-gnome-extensions prefs screenshot-tool-launcher@markevich.org
+```sh
+python3 tests/run.py
 ```
 
-### Command line
-
-The `gsettings` examples below require a system-wide schema install. Alternatively, use `dconf` directly or `dconf-editor` (GUI):
-
-```bash
-# dconf (no schema install needed)
-dconf write /org/gnome/shell/extensions/screenshot-tool-launcher/command "'swappy -f {file}'"
-
-# dconf-editor (GUI)
-dconf-editor /org/gnome/shell/extensions/screenshot-tool-launcher/
-```
-
-### Screenshot command
-
-```bash
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  command 'your-command {file}'
-```
-
-`{file}` is replaced with the screenshot path. If omitted, the path is appended as the last argument.
-
-Examples:
-
-```bash
-# Open in GIMP
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  command 'gimp {file}'
-
-# Open with default viewer
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  command 'xdg-open {file}'
-
-# Custom script
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  command '/path/to/your/script.sh {file}'
-```
-
-### Recording command
-
-```bash
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  recording-command 'your-command {file}'
-```
-
-### Button labels
-
-```bash
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  button-label 'Edit in GIMP'
-
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  recording-button-label 'Play Recording'
-```
-
-### Pipe mode
-
-Pipes the file contents to the command's stdin instead of passing the file path:
-
-```bash
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  command 'wl-copy --type image/png'
-gsettings set org.gnome.shell.extensions.screenshot-tool-launcher \
-  pipe-mode true
-```
-
-### View all settings
-
-```bash
-gsettings list-recursively org.gnome.shell.extensions.screenshot-tool-launcher
-```
-
-### Reset to defaults
-
-```bash
-gsettings reset-recursively org.gnome.shell.extensions.screenshot-tool-launcher
-```
-
-## Settings reference
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `command` | string | `''` | Command for screenshots. `{file}` = file path. Empty = no button. |
-| `button-label` | string | `'Open in Tool'` | Button label on screenshot notifications. |
-| `pipe-mode` | boolean | `false` | Pipe file to stdin instead of passing path. |
-| `recording-command` | string | `''` | Command for recordings. `{file}` = file path. Empty = no button. |
-| `recording-button-label` | string | `'Open Recording'` | Button label on recording notifications. |
+This uses a separate headless compositor and a fake Flatpak command. It checks
+notification actions, Gradia arguments, and disable/re-enable without opening
+Gradia or changing the live desktop.
